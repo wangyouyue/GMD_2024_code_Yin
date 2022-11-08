@@ -1855,17 +1855,17 @@ contains
       end do
 
       !### ( at only condensation/evaporation process ) ###!
-      if( sdm_calvar(1) ) then
+      ! if( sdm_calvar(1) ) then
 
-         call sdm_rhot_qtrc2p_t(RHOT,QTRC,DENS,pres_scale,t_scale)
+      !    call sdm_rhot_qtrc2p_t(RHOT,QTRC,DENS,pres_scale,t_scale)
 
-         call sdm_condevp(sdm_aslset,                                   &
-                          sdm_aslmw,sdm_aslion,sdm_dtevl,               &
-                          pres_scale,t_scale,QTRC(:,:,:,I_QV),          &
-                          sdnum_s2c,sdnumasl_s2c,sdliqice_s2c,sdx_s2c,sdy_s2c,       &
-                          sdr_s2c,sdasl_s2c,sdri_s2c,sdrj_s2c,sdrk_s2c)
+      !    call sdm_condevp(sdm_aslset,                                   &
+      !                     sdm_aslmw,sdm_aslion,sdm_dtevl,               &
+      !                     pres_scale,t_scale,QTRC(:,:,:,I_QV),          &
+      !                     sdnum_s2c,sdnumasl_s2c,sdliqice_s2c,sdx_s2c,sdy_s2c,       &
+      !                     sdr_s2c,sdasl_s2c,sdri_s2c,sdrj_s2c,sdrk_s2c)
 
-      end if
+      ! end if
 
       !### ( melting/freezing process ) ###!
       if( sdm_cold .and. sdm_calvar(4) ) then
