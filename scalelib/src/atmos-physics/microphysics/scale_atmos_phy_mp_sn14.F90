@@ -544,7 +544,7 @@ module scale_atmos_phy_mp_sn14
   logical, private, save :: MP_doautoconversion = .true.
   logical, private, save :: MP_doprecipitation  = .true.
   logical, private, save :: MP_couple_aerosol   = .false. ! apply CCN effect?
-  real(RP), private, save :: MP_ssw_lim = 1.E+1_RP
+  real(RP), private, save :: MP_ssw_lim = 1.E+1_RP  ! 1000%
 
 
   !-----------------------------------------------------------------------------
@@ -2221,6 +2221,8 @@ contains
        moist_pres2qsat_liq  => ATMOS_SATURATION_pres2qsat_liq, &
        moist_pres2qsat_ice  => ATMOS_SATURATION_pres2qsat_ice,   &
        moist_dqsi_dtem_rho  => ATMOS_SATURATION_dqsi_dtem_rho
+       use scale_time, only:     &
+          TIME_NOWSEC
     implicit none
 
     real(RP), intent(in)  :: z(KA)      !
@@ -2243,7 +2245,7 @@ contains
     ! total aerosol number concentration [/m3]
     real(RP), parameter :: c_ccn_ocean= 1.00E+8_RP
     real(RP), parameter :: c_ccn_land = 1.26E+9_RP
-    real(RP), save      :: c_ccn      = 1.00E+8_RP
+    real(RP), save      :: c_ccn      = 8.00E+7_RP!8.00E+7_RP
     ! aerosol activation factor
     real(RP), parameter :: kappa_ocean= 0.462_RP
     real(RP), parameter :: kappa_land = 0.308_RP
@@ -2370,6 +2372,12 @@ contains
           pv        = rhoq(I_QV,k,i,j)*Rvap*tem(k,i,j)
           ssw(k,i,j) = min( MP_ssw_lim, ( pv/esw(k,i,j)-1.0_RP ) )*100.0_RP
           ssi(k,i,j) = (pv/esi(k,i,j) - 1.00_RP)
+
+          !! limiter of super saturation for DYCOMSII(RF02)
+          if(TIME_NOWSEC<3600.0_RP)then
+             ssw(k,i,j) = min(ssw(k,i,j),1.0_RP) ! %
+          end if
+
 !          ssw_below(k+1,i,j) = ssw(k,i,j)
           ssi_below(k+1,i,j) = ssi(k,i,j)
           z_below(k+1,i,j)   = z(k)
