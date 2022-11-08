@@ -241,12 +241,12 @@ contains
        ss_sd  = qv_sd / qvs_sd          !! degree of super-saturation
 
 
-#ifdef DYCOMS2_RF02_SDM
+! #ifdef DYCOMS2_RF02_SDM
        !! limiter of super saturation for DYCOMSII(RF02)
-       if(TIME_NOWSEC<3600.0_RP)then
-          ss_sd = min(ss_sd,1.01_RP)
-       end if
-#endif
+!        if(TIME_NOWSEC<3600.0_RP)then
+!           ss_sd = min(ss_sd,1.01_RP)
+!        end if
+! #endif
 
        !### Set parameters for growth EQ. of the radius ###!
        
