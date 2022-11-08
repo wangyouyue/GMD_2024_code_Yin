@@ -1300,7 +1300,7 @@ contains
           call sdm_sd2rhodropmom(order_n,zph_crs,rhodropmom2,sdnum_tmp,sdn_tmp,sdliqice_tmp, &
                & sdx_tmp,sdy_tmp,sdr_tmp,sdri_tmp,sdrj_tmp,sdrk_tmp,sdrkl_s2c,sdrku_s2c,    &
                & sd_itmp1)
-          call HIST_in( rhodropmom2(:,:,:), 'DMOM2', 'density of the 2nd droplet moment', 'm2/m3')
+          call HIST_in( rhodropmom2(:,:,:), 'DMOM2', 'density of the 2nd droplet moment', 'm/m3')
        end if
 
        if( do_puthist_3 )then
@@ -1308,7 +1308,7 @@ contains
           call sdm_sd2rhodropmom(order_n,zph_crs,rhodropmom3,sdnum_tmp,sdn_tmp,sdliqice_tmp, &
                & sdx_tmp,sdy_tmp,sdr_tmp,sdri_tmp,sdrj_tmp,sdrk_tmp,sdrkl_s2c,sdrku_s2c,    &
                & sd_itmp1)
-          call HIST_in( rhodropmom3(:,:,:), 'DMOM3', 'density of the 3rd droplet moment', 'm3/m3')
+          call HIST_in( rhodropmom3(:,:,:), 'DMOM3', 'density of the 3rd droplet moment', 'm/m3')
        end if
 
        nullify(sdx_tmp)
@@ -1970,6 +1970,8 @@ contains
         sdm_meltfreeze, sdm_meltfreeze_updatefluid
     use m_sdm_subldep, only: &
         sdm_subldep, sdm_subldep_updatefluid
+    use scale_grid, only: &
+        DZ
 
    real(RP), intent(inout) :: DENS(KA,IA,JA)        !! Density [kg/m3]
    real(RP), intent(inout) :: MOMZ(KA,IA,JA)        !! Momentum [kg/s/m2]
@@ -2107,6 +2109,8 @@ contains
    real(RP) :: sdm_dtmlt  ! time step of {melt/freeze of super-droplets} process
    real(RP) :: sdm_dtsbl  ! time step of {sublimation/deposition of super-droplets} process
    real(RP) :: tmp_mink
+   real(RP) :: noise_amp=1.d-4 ! for random noise test
+   real(RP) :: dz_inv
   !---------------------------------------------------------------------
 
       ! Initialize and rename variables
@@ -2231,6 +2235,32 @@ contains
             sd_dtmp6(:) = 0.5_RP*(sd_vz(:)+sd_dtmp6(:))
             call sdm_move(sdm_dtadv,                         &
                           sd_num,sd_dtmp4,sd_dtmp5,sd_dtmp6,sd_x,sd_y,sd_rk)
+
+            !!!  random force to SDs mimicking SGS flcutuations of velocity [for
+            !test]
+            ! Random perturbation to super-droplets
+            call gen_rand_array( sd_rng, sd_rand(1:sd_num) )
+            do n=1,sd_num
+               !### skip invalid super-droplets ###!
+               if( sd_rk(n)<VALID2INVALID ) cycle
+               !### move super-droplets (explicit) ###!
+               sd_x(n)  = sd_x(n)  + (sd_rand(n)-0.5d0)  * sqrt(real(sdm_dtadv,kind=RP)) * noise_amp
+            end do
+            call gen_rand_array( sd_rng, sd_rand(1:sd_num) )
+            do n=1,sd_num
+               !### skip invalid super-droplets ###!
+               if( sd_rk(n)<VALID2INVALID ) cycle
+               !### move super-droplets (explicit) ###!
+               sd_y(n)  = sd_y(n)  + (sd_rand(n)-0.5d0)  * sqrt(real(sdm_dtadv,kind=RP)) * noise_amp
+            end do
+            call gen_rand_array( sd_rng, sd_rand(1:sd_num) )
+            dz_inv=1.0_RP/DZ
+            do n=1,sd_num
+               !### skip invalid super-droplets ###!
+               if( sd_rk(n)<VALID2INVALID ) cycle
+               !### move super-droplets (explicit) ###!
+               sd_rk(n) = sd_rk(n) + (sd_rand(n)-0.5d0) * sqrt(real(sdm_dtadv,kind=RP)) * noise_amp * dz_inv
+            end do
 
             ! lateral boundary routine in SDM
             !! judge super-droplets as invalid or valid in horizontal
