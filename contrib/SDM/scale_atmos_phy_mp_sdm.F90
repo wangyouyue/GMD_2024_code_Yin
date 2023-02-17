@@ -1300,7 +1300,7 @@ contains
           call sdm_sd2rhodropmom(order_n,zph_crs,rhodropmom2,sdnum_tmp,sdn_tmp,sdliqice_tmp, &
                & sdx_tmp,sdy_tmp,sdr_tmp,sdri_tmp,sdrj_tmp,sdrk_tmp,sdrkl_s2c,sdrku_s2c,    &
                & sd_itmp1)
-          call HIST_in( rhodropmom2(:,:,:), 'DMOM2', 'density of the 2nd droplet moment', 'm/m3')
+          call HIST_in( rhodropmom2(:,:,:), 'DMOM2', 'density of the 2nd droplet moment', 'm2/m3')
        end if
 
        if( do_puthist_3 )then
@@ -1308,7 +1308,7 @@ contains
           call sdm_sd2rhodropmom(order_n,zph_crs,rhodropmom3,sdnum_tmp,sdn_tmp,sdliqice_tmp, &
                & sdx_tmp,sdy_tmp,sdr_tmp,sdri_tmp,sdrj_tmp,sdrk_tmp,sdrkl_s2c,sdrku_s2c,    &
                & sd_itmp1)
-          call HIST_in( rhodropmom3(:,:,:), 'DMOM3', 'density of the 3rd droplet moment', 'm/m3')
+          call HIST_in( rhodropmom3(:,:,:), 'DMOM3', 'density of the 3rd droplet moment', 'm3/m3')
        end if
 
        nullify(sdx_tmp)
