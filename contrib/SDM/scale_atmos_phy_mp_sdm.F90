@@ -2157,6 +2157,11 @@ contains
                            sd_num,sd_liqice,sd_x,sd_y,sd_ri,sd_rj,sd_rk,sdi,sd_vz,  &
                            sd_itmp1,'no_interpolation' )
             end if
+            
+            ! set the terminal velocity to 0 when updating sd_z
+            ! please set "doprecipitation = .true." in run.conf
+            ! if you want to turn off the sedimentation
+            sd_vz(:) = 0.0_RP
 
             ! for predictor-corrector
             sd_dtmp1(:) = sd_x(:)
