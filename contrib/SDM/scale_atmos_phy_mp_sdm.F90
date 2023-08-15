@@ -2159,8 +2159,8 @@ contains
             end if
             
             ! set the terminal velocity to 0 when updating sd_z
-            ! please set "doprecipitation = .true." in run.conf
-            ! if you want to turn off the sedimentation
+            ! please set "doprecipitation = .true." and "doautoconversion = .true." in run.conf
+            ! if you want to turn off sedimentation but calculate collision-coalescence
             sd_vz(:) = 0.0_RP
 
             ! for predictor-corrector
