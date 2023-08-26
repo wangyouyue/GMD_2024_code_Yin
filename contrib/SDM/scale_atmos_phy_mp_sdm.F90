@@ -2158,6 +2158,11 @@ contains
                            sd_itmp1,'no_interpolation' )
             end if
 
+            ! set the terminal velocity to 0 when updating sd_z
+            ! please set "doprecipitation = .true." and "doautoconversion = .true." in run.conf
+            ! if you want to turn off sedimentation but calculate collision-coalescence
+            sd_vz(:) = 0.0_RP
+
             ! for predictor-corrector
             sd_dtmp1(:) = sd_x(:)
             sd_dtmp2(:) = sd_y(:)
