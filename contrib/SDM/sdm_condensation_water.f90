@@ -118,6 +118,7 @@ contains
     real(RP) :: dterm3    ! temporary for interation
     real(RP) :: dtmp      ! temporary for interation
     real(RP) :: rddvcp    ! rd / cp
+    real(RP), parameter :: C = 0.8_RP  ! constant for reducing the activation/deactivation time scale
     integer :: idx_nasl(1:22)  ! index for vactorization
 
     integer :: i, j, k, n, s, t, it               ! index
@@ -258,6 +259,8 @@ contains
        Fac_dd  = RLRv_D * t_sd / es_sd
        Fac_kk  = ( LatGas*ivt_sd - 1.0_RP ) * L_RL_K * ivt_sd
        dtivFdk = real( sdm_dtevl, kind=RP ) / ( Fac_dd + Fac_kk )
+       ! reduce the activation/deactivation time scale
+       dtivFdk = dtivFdk * C
 
        eq_a  = CurveF * ivt_sd
 
