@@ -123,6 +123,7 @@ contains
     integer :: i, j, k, n, s, t, it               ! index
     ! Parameters
     integer, parameter :: itr_max = 25   ! iteration number
+    real(RP), parameter :: C = 10.0_RP  ! constant for reducing the activation/deactivation time scale
 !!$    real(RP), parameter :: epsva = 0.622_RP   ! Molecular weight ratio of vapor/air
     !---------------------------------------------------------------------
 #ifdef _FAPP_
@@ -258,6 +259,8 @@ contains
        Fac_dd  = RLRv_D * t_sd / es_sd
        Fac_kk  = ( LatGas*ivt_sd - 1.0_RP ) * L_RL_K * ivt_sd
        dtivFdk = real( sdm_dtevl, kind=RP ) / ( Fac_dd + Fac_kk )
+       ! reduce the activation/deactivation time scale
+       dtivFdk = dtivFdk * C
 
        eq_a  = CurveF * ivt_sd
 

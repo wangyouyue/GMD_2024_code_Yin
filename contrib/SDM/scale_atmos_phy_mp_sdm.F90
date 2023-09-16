@@ -2162,7 +2162,7 @@ contains
             ! please set "doprecipitation = .true." and "doautoconversion = .true." in run.conf
             ! if you want to turn off sedimentation of small particles but calculate collision-coalescence
             do n=1,sd_num
-                if( sd_vz(n) .lt. 1.E-5_RP ) then
+                if( sd_vz(n) .lt. 2.25E-2_RP ) then
                 ! the threshold can be set to 1.e-5, 1.e-4, 1.e-3, 1.e-2, 0.1,
                 ! 0.25, 0.5, 1, 2, 4, ... m/s
                     sd_vz(n) = 0.0_RP
