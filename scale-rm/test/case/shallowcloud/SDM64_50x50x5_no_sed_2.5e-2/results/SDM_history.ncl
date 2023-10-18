@@ -6,17 +6,19 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 begin
     setfileoption("nc","Format","NetCDF4Classic")
 
-    PRC_NUM_X = 20
-    PRC_NUM_Y = 20
+    PRC_NUM_X = stringtointeger(systemfunc("awk '/ PRC_NUM_X / {print $3}' ../run.conf"))
+    PRC_NUM_Y = stringtointeger(systemfunc("awk '/ PRC_NUM_Y / {print $3}' ../run.conf"))
     MPI = PRC_NUM_X*PRC_NUM_Y
-    I_MAX = 6
-    J_MAX = 6
-    K_MAX = 300
-    T_MAX = 361
-    DX = 50
-    DY = 50
-    DZ = 5
-    DT = 60
+    I_MAX = stringtointeger(systemfunc("awk '/ IMAX / {print $3}' ../run.conf"))
+    J_MAX = stringtointeger(systemfunc("awk '/ JMAX / {print $3}' ../run.conf"))
+    K_MAX = stringtointeger(systemfunc("awk '/ KMAX / {print $3}' ../run.conf"))
+    TIME_DURATION = stringtointeger(systemfunc("awk '/TIME_DURATION / {print $3}' ../run.conf"))
+    DX = stringtointeger(systemfunc("awk '/ DX / {print $3}' ../run.conf"))
+    DY = stringtointeger(systemfunc("awk '/ DY / {print $3}' ../run.conf"))
+    DZ = stringtointeger(systemfunc("awk '/ DZ / {print $3}' ../run.conf"))
+    DT = stringtointeger(systemfunc("awk '/ HISTORY_DEFAULT_TINTERVAL / {print $3}' ../run.conf"))
+    T_MAX = TIME_DURATION/DT + 1
+    ntime = T_MAX - 1
     D = 3.75e-6
     L = 2.5e6
     cp = 1004.0
@@ -25,7 +27,7 @@ begin
     pref = 1000.0
     g = 9.81
 
-    case_name = "SDM64_50x50x5_mvexchg"
+    case_name = systemfunc("(basename $(dirname $PWD))")
     diri = "../"   ; input directory
 
     ; Define dimensions.
@@ -196,7 +198,7 @@ begin
                 theta_v_ave(ti,zi) = avg(theta_v(ti,zi,:,:))
                 temp_v_ave(ti,zi) = avg(temp_v(zi,:,:))
             end do
-            delete([/lwpt, temp_v, PRES, TEMP, QLIQ, TKE_SMG, TKE_RS, U, V, W, PT, QV, QR, RAIN/])
+            delete([/lwpt, temp_v, PRES, TEMP, TKE_SMG, TKE_RS, U, V, W, PT, QV, QR, RAIN/])
             z       = f->z
             QHYD_sd    = f->QHYD_sd(ti,:,:,:) 
             QHYD_sd    = QHYD_sd * 1000
@@ -207,11 +209,17 @@ begin
             do yi = 0, J_MAX - 1
                 do xi = 0, I_MAX - 1
                     do zi = 0, K_MAX - 1
-                        mass(zi,yi,xi) = QHYD_sd(zi,yi,xi)*DENS(zi,yi,xi)*(DX*DY*DZ)*1e-3
                         if (QTOT(zi,yi,xi) .lt. 8.0) then
                             invz_ave(ti) = invz_ave(ti) + z(zi)
                             break
                         end if
+                    end do
+                end do
+            end do
+            do yi = 0, J_MAX - 1
+                do xi = 0, I_MAX - 1
+                    do zi = 0, K_MAX - 1
+                        mass(zi,yi,xi) = QLIQ(zi,yi,xi)*DENS(zi,yi,xi)*(DX*DY*DZ)*1e-3
                     end do
                 end do
             end do
@@ -315,7 +323,7 @@ begin
         fout->lwp_2d      = (/lwp_2d/)
         delete([/fout, lwp_2d/])
         ; 4D (t, z, y, x)
-        NC   = f->NC        ; num/kg
+        NC   = f->NC        ; num/m3
         delete(f)
         NC = NC * 1e-6  ; num/cm3
         cloud = new((/T_MAX, K_MAX, J_MAX, I_MAX/),"integer")

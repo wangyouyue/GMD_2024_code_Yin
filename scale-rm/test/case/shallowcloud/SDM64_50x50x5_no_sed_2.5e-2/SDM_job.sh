@@ -8,7 +8,7 @@
 #PJM -j
 #------- Program execution -------#
 module load intel impi hdf5 netcdf netcdf-fortran
-
+source ~/.bashrc
 # run
 mpiexec.hydra -n ${PJM_MPI_PROC} ./scale-rm_init init.conf || exit
 mpiexec.hydra -n ${PJM_MPI_PROC} ./scale-rm run.conf || exit
