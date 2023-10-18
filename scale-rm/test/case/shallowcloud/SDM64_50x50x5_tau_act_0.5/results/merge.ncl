@@ -4,24 +4,25 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRF_contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 
 begin
-	setfileoption("nc","Format","NetCDF4Classic")
-    ntime = 360
-    PRC_NUM_X = 20
-    PRC_NUM_Y = 20
+    setfileoption("nc","Format","NetCDF4Classic")
+    PRC_NUM_X = stringtointeger(systemfunc("awk '/ PRC_NUM_X / {print $3}' ../run.conf"))
+    PRC_NUM_Y = stringtointeger(systemfunc("awk '/ PRC_NUM_Y / {print $3}' ../run.conf"))
     MPI = PRC_NUM_X*PRC_NUM_Y
-    I_MAX = 6
-    J_MAX = 6
-    K_MAX = 300
-    T_MAX = 361
-    DX = 50
-    DY = 50
-    DZ = 5
-    DT = 60
+    I_MAX = stringtointeger(systemfunc("awk '/ IMAX / {print $3}' ../run.conf"))
+    J_MAX = stringtointeger(systemfunc("awk '/ JMAX / {print $3}' ../run.conf"))
+    K_MAX = stringtointeger(systemfunc("awk '/ KMAX / {print $3}' ../run.conf"))
+    TIME_DURATION = stringtointeger(systemfunc("awk '/TIME_DURATION / {print $3}' ../run.conf"))
+    DX = stringtointeger(systemfunc("awk '/ DX / {print $3}' ../run.conf"))
+    DY = stringtointeger(systemfunc("awk '/ DY / {print $3}' ../run.conf"))
+    DZ = stringtointeger(systemfunc("awk '/ DZ / {print $3}' ../run.conf"))
+    DT = stringtointeger(systemfunc("awk '/ HISTORY_DEFAULT_TINTERVAL / {print $3}' ../run.conf"))
+    T_MAX = TIME_DURATION/DT + 1
+    ntime = T_MAX - 1
     D = 3.75e-6
     g = 9.81
 
-	diri = "./"   ; input directory
-    case_name = "SDM64_50x50x5_mvexchg"
+    diri = "./"   ; input directory
+    case_name = systemfunc("(basename $(dirname $PWD))")
 
     ; Define dimensions.
     dim_names = (/ "x",  "y",  "z", "time", "X", "Y", "ntime"/)
@@ -44,8 +45,8 @@ begin
     tke_sgs_h = 0
     tke_rs_h = new((/T_MAX,K_MAX/),"double")
     tke_rs_h = 0
-	dens_ave = new((/T_MAX,K_MAX/),"double")
-	dens_ave = 0
+    dens_ave = new((/T_MAX,K_MAX/),"double")
+    dens_ave = 0
     pt_ave = new((/T_MAX,K_MAX/),"double")
     pt_ave = 0
     rh_h = new((/T_MAX,K_MAX/),"double")
@@ -187,58 +188,58 @@ begin
     w_theta_v_ave = new((/T_MAX,K_MAX/),"double")
     w_theta_v_ave = 0
     do fi = 0, MPI - 1
-    	f = addfile(case_name + ".pe" + tostring_with_format(fi,"%06d") + ".nc", "r")
-    	; 2D
-    	PRES = f->pres_ave
-    	TEMP = f->temp_ave
-    	LWPT = f->lwpt_h
-    	QL   = f->ql_h
+        f = addfile(case_name + ".pe" + tostring_with_format(fi,"%06d") + ".nc", "r")
+        ; 2D
+        PRES = f->pres_ave
+        TEMP = f->temp_ave
+        LWPT = f->lwpt_h
+        QL   = f->ql_h
         QR   = f->qr_h
-    	QT   = f->qt_h
-    	TKE_SGS   = f->tke_sgs_h
-    	TKE_RS    = f->tke_rs_h
-    	DENS = f->dens_ave
-    	PT   = f->pt_ave
-    	RH   = f->rh_h
-    	theta_v = f->theta_v_ave
-    	temp_v  = f->temp_v_ave
-    	sum_u    = f->u_ave
-    	sum_v    = f->v_ave
-    	sum_w    = f->w_ave
+        QT   = f->qt_h
+        TKE_SGS   = f->tke_sgs_h
+        TKE_RS    = f->tke_rs_h
+        DENS = f->dens_ave
+        PT   = f->pt_ave
+        RH   = f->rh_h
+        theta_v = f->theta_v_ave
+        temp_v  = f->temp_v_ave
+        sum_u    = f->u_ave
+        sum_v    = f->v_ave
+        sum_w    = f->w_ave
         sum_u2    = f->sum_u2
         sum_v2    = f->sum_v2
         sum_w2    = f->sum_w2
         sum_w3    = f->sum_w3
         w_theta_v = f->w_theta_v
-    	nc_profile = f->nc_h
-    	NNK  = f->n_nnk
-    	cf_profile = f->cf_h
+        nc_profile = f->nc_h
+        NNK  = f->n_nnk
+        cf_profile = f->cf_h
 
-    	pres_ave = pres_ave + PRES
-    	temp_ave = temp_ave + TEMP
-    	lwpt_h = lwpt_h + LWPT
-    	ql_h = ql_h + QL
+        pres_ave = pres_ave + PRES
+        temp_ave = temp_ave + TEMP
+        lwpt_h = lwpt_h + LWPT
+        ql_h = ql_h + QL
         qr_h = qr_h + QR
-    	qt_h = qt_h + QT
-    	tke_sgs_h = tke_sgs_h + TKE_SGS
-    	tke_rs_h  = tke_rs_h + TKE_RS
-    	dens_ave  = dens_ave + DENS
-    	pt_ave    = pt_ave + PT
-    	rh_h = rh_h + RH
-    	theta_v_ave = theta_v_ave + theta_v
-    	temp_v_ave  = temp_v_ave + temp_v
-    	u_ave = u_ave + sum_u
-    	v_ave = v_ave + sum_v
-    	w_ave = w_ave + sum_w
+        qt_h = qt_h + QT
+        tke_sgs_h = tke_sgs_h + TKE_SGS
+        tke_rs_h  = tke_rs_h + TKE_RS
+        dens_ave  = dens_ave + DENS
+        pt_ave    = pt_ave + PT
+        rh_h = rh_h + RH
+        theta_v_ave = theta_v_ave + theta_v
+        temp_v_ave  = temp_v_ave + temp_v
+        u_ave = u_ave + sum_u
+        v_ave = v_ave + sum_v
+        w_ave = w_ave + sum_w
         u2_ave = u2_ave + sum_u2
         v2_ave = v2_ave + sum_v2
         w2_ave = w2_ave + sum_w2
         w3_ave = w3_ave + sum_w3
         w_theta_v_ave = w_theta_v_ave + w_theta_v
-    	nc_h  = nc_h + nc_profile
-    	n_nnk = n_nnk + NNK
-    	cf_h  = cf_h + cf_profile
-    	delete([/ PRES, TEMP, LWPT, QL, QT, TKE_SGS, TKE_RS, DENS, PT, RH, theta_v, temp_v, sum_u, sum_v, sum_w, nc_profile, NNK, cf_profile, sum_u2, sum_v2, sum_w2, sum_w3, w_theta_v/])
+        nc_h  = nc_h + nc_profile
+        n_nnk = n_nnk + NNK
+        cf_h  = cf_h + cf_profile
+        delete([/ PRES, TEMP, LWPT, QL, QT, TKE_SGS, TKE_RS, DENS, PT, RH, theta_v, temp_v, sum_u, sum_v, sum_w, nc_profile, NNK, cf_profile, sum_u2, sum_v2, sum_w2, sum_w3, w_theta_v/])
         
         ; 1D
         INVZ = f->invz_ave
@@ -262,7 +263,7 @@ begin
         n_nnt    = n_nnt + NNT
         sfc_precip = sfc_precip + RAIN
         n_col    = n_col + col
-        do ti = 1, T_MAX - 1
+        do ti = 0, T_MAX - 1
             cloud_top(ti) = cloud_top(ti) + sum(top(ti,:,:))
             cloud_base(ti) = cloud_base(ti) + sum(base(ti,:,:))
         end do
@@ -296,16 +297,16 @@ begin
     v_val    = v2_ave - v_ave^2
     w_val    = w2_ave - w_ave^2
     w_sk     = w3_ave - w_ave^3 + 3 * w_ave * (w_ave^2 - w2_ave)
-    tot_boy = (w_theta_v_ave - w_ave * theta_v_ave)*g*10000.0/temp_v_ave
+    tot_boy = (w_theta_v_ave - w_ave * theta_v_ave)*g*10000.0/theta_v_ave
     delete([/u2_ave, v2_ave, w2_ave, w3_ave, w_theta_v_ave/])
-    do ti = 1, T_MAX - 1
-    	do zi = 0, K_MAX - 1
-    		if (n_nnk(ti, zi) .eq. 0) then
-    			nc_h(ti, zi) = 0
-    		else
-    			nc_h(ti, zi) = nc_h(ti, zi)/n_nnk(ti, zi)
-    		end if
-    	end do
+    do ti = 0, T_MAX - 1
+        do zi = 0, K_MAX - 1
+            if (n_nnk(ti, zi) .eq. 0) then
+                nc_h(ti, zi) = 0
+            else
+                nc_h(ti, zi) = nc_h(ti, zi)/n_nnk(ti, zi)
+            end if
+        end do
     end do
     system("rm -f " + case_name + ".nc")
     fout = addfile(case_name + ".nc","c")
@@ -388,38 +389,38 @@ begin
     do ti = 1, T_MAX - 1
        er(ti) = (invz_ave(ti) - invz_ave(ti-1))/DT + D * invz_ave(ti)
     end do
-	do ti = 1, T_MAX - 1
+    do ti = 0, T_MAX - 1
        w_max(ti) = max(w_val(ti,:))
        do zi = 0, K_MAX - 1
           tke_t(ti) = tke_t(ti) + ((u_val(ti,zi) + v_val(ti,zi) + w_val(ti,zi))/2)*DZ
        end do
-	end do
-	er = er * 100
-	filevardef(fout, var_names1D, varvar_types1D, (/  "time" /))
-	filevarattdef( fout, "invz_ave", invz_ave )
-	filevarattdef( fout, "er", er )
-	filevarattdef( fout, "lwp_t", lwp_t )
-	filevarattdef( fout, "rh_t", rh_t )
+    end do
+    er = er * 100
+    filevardef(fout, var_names1D, varvar_types1D, (/  "time" /))
+    filevarattdef( fout, "invz_ave", invz_ave )
+    filevarattdef( fout, "er", er )
+    filevarattdef( fout, "lwp_t", lwp_t )
+    filevarattdef( fout, "rh_t", rh_t )
     filevarattdef( fout, "sfc_precip", sfc_precip )
-	filevarattdef( fout, "cf_t", cf_t )
-	filevarattdef( fout, "nc_t", nc_t )
+    filevarattdef( fout, "cf_t", cf_t )
+    filevarattdef( fout, "nc_t", nc_t )
     filevarattdef( fout, "tke_t", tke_t )
     filevarattdef( fout, "w_max", w_max )
     filevarattdef( fout, "cloud_top", cloud_top )
     filevarattdef( fout, "cloud_base", cloud_base )
 
-	fout->invz_ave= (/invz_ave/)
-	fout->er      = (/er/)
-	fout->lwp_t   = (/lwp_t/)
-	fout->rh_t    = (/rh_t/)
+    fout->invz_ave= (/invz_ave/)
+    fout->er      = (/er/)
+    fout->lwp_t   = (/lwp_t/)
+    fout->rh_t    = (/rh_t/)
     fout->sfc_precip    = (/sfc_precip/)
-	fout->cf_t    = (/cf_t/)
-	fout->nc_t    = (/nc_t/)
+    fout->cf_t    = (/cf_t/)
+    fout->nc_t    = (/nc_t/)
     fout->tke_t   = (/tke_t/)
     fout->w_max   = (/w_max/)
     fout->cloud_top   = (/cloud_top/)
     fout->cloud_base   = (/cloud_base/)
-	delete([/invz_ave, er, lwp_t, rh_t, cf_t, nc_t, n_nnt, u_val, v_val, w_val, w_max, sfc_precip, tke_t, cloud_base, cloud_top/])
+    delete([/invz_ave, er, lwp_t, rh_t, cf_t, nc_t, n_nnt, u_val, v_val, w_val, w_max, sfc_precip, tke_t, cloud_base, cloud_top/])
     ; 4D
     files = systemfunc ("ls " + case_name + ".pe*") 
     f = addfiles (files, "r")   
@@ -427,7 +428,7 @@ begin
     lwp_2d = new((/ntime + 1, J_MAX*PRC_NUM_Y,I_MAX*PRC_NUM_X/),"double")
     lwp_2d@long_name  = "liquid water path horizontal distribution"
     lwp_2d@units = "kg/m2"
-    do ti = 1, T_MAX - 1, (T_MAX - 1)/ntime
+    do ti = 0, T_MAX - 1, (T_MAX - 1)/ntime
         lwp = f[:]->lwp_2d(:,ti,:,:)
         do fi = 0, MPI - 1
             do xi = 0, I_MAX - 1
