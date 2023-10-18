@@ -26,7 +26,7 @@ module mod_user
   use scale_tracer
   use scale_index
   use mpi
-#ifdef _SDM
+#ifdef SDM
   use m_sdm_common, only: QTRC_sdm
 #endif
   !-----------------------------------------------------------------------------
@@ -564,7 +564,7 @@ contains
        do k = KS, KE
           QTOT = 0.0_RP
           QTOT = QTOT + QTRC(k,i,j,I_QV)
-#ifdef _SDM
+#ifdef SDM
           do iq = QHS, QHE
              QTOT = QTOT + QTRC_sdm(k,i,j,iq)
           enddo
@@ -634,7 +634,7 @@ contains
        do k = KS, KE
           QTOT = 0.0_RP
           QTOT = QTOT + QTRC(k,i,j,I_QV)
-#ifdef _SDM
+#ifdef SDM
           do iq = QHS, QHE
              QTOT = QTOT + QTRC_sdm(k,i,j,iq)
           enddo
@@ -669,7 +669,7 @@ contains
           do k2 = KS, KE
              QWSUM = 0.0_RP
              do iq = QHS, QHE
-#ifdef _SDM
+#ifdef SDM
                 QWSUM = QWSUM + QTRC_sdm_test(k2,i,j,iq)
 #else
                 QWSUM = QWSUM + QTRC_test(k2,i,j,iq)
@@ -692,7 +692,7 @@ contains
 
            QTOT = 0.0_RP
            QTOT = QTOT + QTRC_test(k,i,j,I_QV)
-#ifdef _SDM
+#ifdef SDM
 
 #else
            do iq = QHS, QHE
